@@ -1,23 +1,25 @@
 import 'package:flutter/material.dart';
-import '../utils/shared_prefs_helper.dart';
+import '../main.dart';
 import 'login_screen.dart';
 import 'promotion_list_screen.dart';
 
 class HomeScreen extends StatelessWidget {
   const HomeScreen({super.key});
 
-  Future<void> _logout(BuildContext context) async {
-    await SharedPrefsHelper.logout();
-    if (context.mounted) {
-      Navigator.pushReplacement(
-        context,
-        MaterialPageRoute(builder: (context) => const LoginScreen()),
-      );
-    }
+  void _logout(BuildContext context) {
+    AppState.logout();
+    Navigator.pushReplacement(
+      context,
+      MaterialPageRoute(builder: (context) => const LoginScreen()),
+    );
   }
 
   @override
   Widget build(BuildContext context) {
+    final userDetail = AppState.userDetail;
+    final username = userDetail?.username ?? 'User';
+    final roleCode = userDetail?.roleCode ?? '';
+
     return Scaffold(
       appBar: AppBar(
         title: const Text('PromoApp'),
@@ -34,24 +36,45 @@ class HomeScreen extends StatelessWidget {
                   colors: [Colors.blue.shade700, Colors.purple.shade700],
                 ),
               ),
-              child: const Center(
+              child: Center(
                 child: Column(
                   mainAxisAlignment: MainAxisAlignment.center,
                   children: [
-                    CircleAvatar(
+                    const CircleAvatar(
                       radius: 50,
                       backgroundColor: Colors.white,
                       child: Icon(Icons.person, size: 50, color: Colors.blue),
                     ),
-                    SizedBox(height: 12),
+                    const SizedBox(height: 12),
                     Text(
-                      'User',
-                      style: TextStyle(
+                      username,
+                      style: const TextStyle(
                         color: Colors.white,
                         fontSize: 20,
                         fontWeight: FontWeight.bold,
                       ),
                     ),
+                    if (roleCode.isNotEmpty) ...[
+                      const SizedBox(height: 4),
+                      Container(
+                        padding: const EdgeInsets.symmetric(
+                          horizontal: 12,
+                          vertical: 4,
+                        ),
+                        decoration: BoxDecoration(
+                          color: Colors.white.withOpacity(0.3),
+                          borderRadius: BorderRadius.circular(12),
+                        ),
+                        child: Text(
+                          roleCode,
+                          style: const TextStyle(
+                            color: Colors.white,
+                            fontSize: 12,
+                            fontWeight: FontWeight.w500,
+                          ),
+                        ),
+                      ),
+                    ],
                   ],
                 ),
               ),
@@ -91,10 +114,17 @@ class HomeScreen extends StatelessWidget {
               style: TextStyle(fontSize: 24, fontWeight: FontWeight.bold),
             ),
             const SizedBox(height: 8),
-            const Text(
-              'Tap the hamburger menu to see options',
-              style: TextStyle(fontSize: 16, color: Colors.grey),
+            Text(
+              'Logged in as: $username',
+              style: const TextStyle(fontSize: 16, color: Colors.grey),
             ),
+            if (roleCode.isNotEmpty) ...[
+              const SizedBox(height: 4),
+              Text(
+                'Role: $roleCode',
+                style: const TextStyle(fontSize: 14, color: Colors.grey),
+              ),
+            ],
           ],
         ),
       ),

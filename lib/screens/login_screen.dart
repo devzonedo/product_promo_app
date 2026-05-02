@@ -1,6 +1,10 @@
 import 'package:flutter/material.dart';
-import '../utils/shared_prefs_helper.dart';
+import 'dart:convert';
+import 'package:http/http.dart' as http;
+import '../main.dart';
 import 'home_screen.dart';
+import '../utils/jwt_helper.dart';
+import '../models/user_model.dart';
 
 class LoginScreen extends StatefulWidget {
   const LoginScreen({super.key});
@@ -22,34 +26,145 @@ class _LoginScreenState extends State<LoginScreen> {
         _isLoading = true;
       });
 
-      // Simulate API call
-      await Future.delayed(const Duration(seconds: 1));
-
-      // Simple validation - in real app, you'd validate against backend
-      if (_usernameController.text.isNotEmpty &&
-          _passwordController.text.isNotEmpty) {
-        await SharedPrefsHelper.setLoggedIn(true);
+      try {
+        final result = await _authenticateUser(
+          _usernameController.text.trim(),
+          _passwordController.text.trim(),
+        );
 
         if (mounted) {
-          Navigator.pushReplacement(
-            context,
-            MaterialPageRoute(builder: (context) => const HomeScreen()),
-          );
+          if (result['success'] == true) {
+            final String token = result['token'];
+            print('Received token: $token'); // Debugging log
+            // Decode JWT token to get user details
+            final UserDetailModel? userDetail = JwtHelper.decodeToken(token);
+
+            if (userDetail != null) {
+              // Store both token and user details
+              AppState.setToken(token, userDetail: userDetail);
+
+              ScaffoldMessenger.of(context).showSnackBar(
+                SnackBar(
+                  content: Text('Welcome ${userDetail.username}!'),
+                  backgroundColor: Colors.green,
+                  duration: const Duration(seconds: 2),
+                ),
+              );
+
+              Navigator.pushReplacement(
+                context,
+                MaterialPageRoute(builder: (context) => const HomeScreen()),
+              );
+            } else {
+              ScaffoldMessenger.of(context).showSnackBar(
+                const SnackBar(
+                  content: Text('Failed to decode user information'),
+                  backgroundColor: Colors.red,
+                ),
+              );
+            }
+          } else {
+            ScaffoldMessenger.of(context).showSnackBar(
+              SnackBar(
+                content: Text(result['error']),
+                backgroundColor: Colors.red,
+                duration: const Duration(seconds: 3),
+              ),
+            );
+          }
         }
-      } else {
+      } catch (e) {
         if (mounted) {
           ScaffoldMessenger.of(context).showSnackBar(
-            const SnackBar(
-              content: Text('Please enter valid credentials'),
+            SnackBar(
+              content: Text('Error: ${e.toString()}'),
               backgroundColor: Colors.red,
             ),
           );
         }
+      } finally {
+        if (mounted) {
+          setState(() {
+            _isLoading = false;
+          });
+        }
       }
+    }
+  }
 
-      setState(() {
-        _isLoading = false;
-      });
+  Future<Map<String, dynamic>> _authenticateUser(
+    String username,
+    String password,
+  ) async {
+    try {
+      final url = Uri.parse('http://192.168.1.2:3000/token');
+
+      // For Android emulator, use:
+      // final url = Uri.parse('http://10.0.2.2:3000/token');
+
+      final response = await http
+          .post(
+            url,
+            headers: {'Content-Type': 'application/json'},
+            body: jsonEncode({'username': username, 'password': password}),
+          )
+          .timeout(
+            const Duration(seconds: 10),
+            onTimeout: () {
+              throw Exception('Connection timeout. Please try again.');
+            },
+          );
+
+      if (response.statusCode == 200) {
+        final Map<String, dynamic> responseData = jsonDecode(response.body);
+
+        if (responseData.containsKey('token') &&
+            responseData['token'] != null) {
+          return {'success': true, 'token': responseData['token']};
+        } else {
+          return {
+            'success': false,
+            'error': 'Invalid response from server: Token not found',
+          };
+        }
+      } else {
+        String errorMessage = _getErrorMessage(
+          response.statusCode,
+          response.body,
+        );
+        return {'success': false, 'error': errorMessage};
+      }
+    } catch (e) {
+      return {'success': false, 'error': 'Connection failed: ${e.toString()}'};
+    }
+  }
+
+  String _getErrorMessage(int statusCode, String responseBody) {
+    try {
+      final Map<String, dynamic> errorData = jsonDecode(responseBody);
+      if (errorData.containsKey('message')) {
+        return errorData['message'];
+      }
+      if (errorData.containsKey('error')) {
+        return errorData['error'];
+      }
+    } catch (e) {
+      // If response body is not JSON, use default messages
+    }
+
+    switch (statusCode) {
+      case 400:
+        return 'Bad request: Please check your input';
+      case 401:
+        return 'Invalid username or password';
+      case 403:
+        return 'Access denied';
+      case 404:
+        return 'Service not found';
+      case 500:
+        return 'Server error. Please try again later';
+      default:
+        return 'Login failed. Please try again. (Status code: $statusCode)';
     }
   }
 
@@ -163,7 +278,7 @@ class _LoginScreenState extends State<LoginScreen> {
                       ),
                       const SizedBox(height: 16),
                       Text(
-                        'Demo: any username/password',
+                        'Enter your credentials to continue',
                         style: TextStyle(
                           color: Colors.grey.shade600,
                           fontSize: 12,
