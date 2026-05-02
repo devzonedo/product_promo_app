@@ -32,6 +32,8 @@ migrate_working_dir/
 .pub/
 /build/
 /coverage/
+.DartTool/
+.packages
 
 # Symbolication related
 app.*.symbols
@@ -39,41 +41,25 @@ app.*.symbols
 # Obfuscation related
 app.*.map.json
 
-# Android Studio will place build artifacts here
-/android/app/debug
-/android/app/profile
-/android/app/release
-
-
-
-
-
-.DartTool/
-.packages
-.pub/
-build/
-*.lock
-*.iml
-.idea/
-.vscode/
-*.swp
-*.swo
-*~
-.DS_Store
-/coverage/
-*.g.dart
-*.freezed.dart
+# Android related
 android/.gradle/
 android/local.properties
+android/app/debug
+android/app/profile
+android/app/release
+android/app/src/main/java/io/flutter/plugins/
+
+# iOS related
 ios/.symlinks/
 ios/Pods/
 ios/Podfile.lock
 ios/Flutter/Flutter.podspec
 ios/build/
-android/app/src/main/java/io/flutter/plugins/
-*.log
+
+# Flutter generated
+*.g.dart
+*.freezed.dart
 flutter_*.png
-app.*.symbols
-app.*.map.json
 
-
+# Lock files
+*.lock
