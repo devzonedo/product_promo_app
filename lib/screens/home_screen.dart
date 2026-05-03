@@ -6,6 +6,108 @@ import 'promotion_list_screen.dart';
 class HomeScreen extends StatelessWidget {
   const HomeScreen({super.key});
 
+  List<Map<String, dynamic>> _getMenuItems(String roleCode) {
+    final commonItems = [
+      {
+        'icon': Icons.list_alt,
+        'title': 'List Promotion xyz',
+        'screen': const PromotionListScreen(),
+        'requiresAuth': true,
+      },
+    ];
+
+    final adminItems = [
+      {
+        'icon': Icons.dashboard,
+        'title': 'Admin Dashboard',
+        'screen': null, // Replace with your admin dashboard screen
+        'requiresAuth': true,
+      },
+      {
+        'icon': Icons.people,
+        'title': 'User Management',
+        'screen': null, // Replace with user management screen
+        'requiresAuth': true,
+      },
+      {
+        'icon': Icons.category,
+        'title': 'Manage Promotions',
+        'screen': null, // Replace with promotion management screen
+        'requiresAuth': true,
+      },
+    ];
+
+    print('HomeScreen drawer: roleCode=$roleCode');
+    if (roleCode == 'ADMIN') {
+      return [...commonItems, ...adminItems];
+    }
+    print('xxxxxxxxxxxxxxxxxxxxxxxxx');
+    return commonItems; // USER role
+  }
+
+  // Private helper method for drawer header
+  Widget _buildDrawerHeader(String username, String roleCode) {
+    return Container(
+      height: 200,
+      decoration: BoxDecoration(
+        gradient: LinearGradient(
+          colors: [Colors.blue.shade700, Colors.purple.shade700],
+        ),
+      ),
+      child: Center(
+        child: Column(
+          mainAxisAlignment: MainAxisAlignment.center,
+          children: [
+            const CircleAvatar(
+              radius: 50,
+              backgroundColor: Colors.white,
+              child: Icon(Icons.person, size: 50, color: Colors.blue),
+            ),
+            const SizedBox(height: 12),
+            Text(
+              username,
+              style: const TextStyle(
+                color: Colors.white,
+                fontSize: 20,
+                fontWeight: FontWeight.bold,
+              ),
+            ),
+            if (roleCode.isNotEmpty) ...[
+              const SizedBox(height: 4),
+              Container(
+                padding: const EdgeInsets.symmetric(
+                  horizontal: 12,
+                  vertical: 4,
+                ),
+                decoration: BoxDecoration(
+                  color: Colors.white.withOpacity(0.3),
+                  borderRadius: BorderRadius.circular(12),
+                ),
+                child: Text(
+                  roleCode,
+                  style: const TextStyle(
+                    color: Colors.white,
+                    fontSize: 12,
+                    fontWeight: FontWeight.w500,
+                  ),
+                ),
+              ),
+            ],
+          ],
+        ),
+      ),
+    );
+  }
+
+  // Private helper method for logout tile
+  Widget _buildLogoutTile(BuildContext context) {
+    return ListTile(
+      leading: const Icon(Icons.logout, color: Colors.red),
+      title: const Text('Logout', style: TextStyle(color: Colors.red)),
+      onTap: () => _logout(context),
+    );
+  }
+
   void _logout(BuildContext context) {
     AppState.logout();
     Navigator.pushReplacement(
@@ -19,7 +121,8 @@ class HomeScreen extends StatelessWidget {
     final userDetail = AppState.userDetail;
     final username = userDetail?.username ?? 'User';
     final roleCode = userDetail?.roleCode ?? '';
-
+    final menuItems = _getMenuItems(roleCode);
+    print('menuItems length: $menuItems.length');
     return Scaffold(
       appBar: AppBar(
         title: const Text('PromoApp'),
@@ -79,24 +182,29 @@ class HomeScreen extends StatelessWidget {
                 ),
               ),
             ),
-            ListTile(
-              leading: const Icon(Icons.list_alt),
-              title: const Text('List Promotion'),
-              onTap: () {
-                Navigator.pop(context);
-                Navigator.push(
-                  context,
-                  MaterialPageRoute(
-                    builder: (context) => const PromotionListScreen(),
-                  ),
-                );
-              },
+            ...menuItems.map(
+              (item) => ListTile(
+                leading: Icon(item['icon']),
+                title: Text(item['title']),
+                onTap: () {
+                  Navigator.pop(context);
+                  if (item['screen'] != null) {
+                    Navigator.push(
+                      context,
+                      MaterialPageRoute(builder: (context) => item['screen']),
+                    );
+                  }
+                },
+              ),
             ),
             const Spacer(),
             const Divider(),
             ListTile(
               leading: const Icon(Icons.logout, color: Colors.red),
-              title: const Text('Logout', style: TextStyle(color: Colors.red)),
+              title: const Text(
+                'Logoutxyz',
+                style: TextStyle(color: Colors.red),
+              ),
               onTap: () => _logout(context),
             ),
             const SizedBox(height: 20),
