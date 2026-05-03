@@ -5,6 +5,7 @@ import '../main.dart';
 import 'home_screen.dart';
 import '../utils/jwt_helper.dart';
 import '../models/user_model.dart';
+import '../services/api_service.dart';
 
 class LoginScreen extends StatefulWidget {
   const LoginScreen({super.key});
@@ -20,6 +21,8 @@ class _LoginScreenState extends State<LoginScreen> {
   bool _isLoading = false;
   bool _obscurePassword = true;
 
+  final ApiService _apiService = ApiService();
+
   Future<void> _login() async {
     if (_formKey.currentState!.validate()) {
       setState(() {
@@ -27,7 +30,7 @@ class _LoginScreenState extends State<LoginScreen> {
       });
 
       try {
-        final result = await _authenticateUser(
+        final result = await _apiService.login(
           _usernameController.text.trim(),
           _passwordController.text.trim(),
         );
@@ -92,52 +95,52 @@ class _LoginScreenState extends State<LoginScreen> {
     }
   }
 
-  Future<Map<String, dynamic>> _authenticateUser(
-    String username,
-    String password,
-  ) async {
-    try {
-      final url = Uri.parse('http://192.168.1.2:3000/token');
+  // Future<Map<String, dynamic>> _authenticateUser(
+  //   String username,
+  //   String password,
+  // ) async {
+  //   try {
+  //     final url = Uri.parse('http://192.168.1.2:3000/token');
 
-      // For Android emulator, use:
-      // final url = Uri.parse('http://10.0.2.2:3000/token');
+  //     // For Android emulator, use:
+  //     // final url = Uri.parse('http://10.0.2.2:3000/token');
 
-      final response = await http
-          .post(
-            url,
-            headers: {'Content-Type': 'application/json'},
-            body: jsonEncode({'username': username, 'password': password}),
-          )
-          .timeout(
-            const Duration(seconds: 10),
-            onTimeout: () {
-              throw Exception('Connection timeout. Please try again.');
-            },
-          );
+  //     final response = await http
+  //         .post(
+  //           url,
+  //           headers: {'Content-Type': 'application/json'},
+  //           body: jsonEncode({'username': username, 'password': password}),
+  //         )
+  //         .timeout(
+  //           const Duration(seconds: 10),
+  //           onTimeout: () {
+  //             throw Exception('Connection timeout. Please try again.');
+  //           },
+  //         );
 
-      if (response.statusCode == 200) {
-        final Map<String, dynamic> responseData = jsonDecode(response.body);
+  //     if (response.statusCode == 200) {
+  //       final Map<String, dynamic> responseData = jsonDecode(response.body);
 
-        if (responseData.containsKey('token') &&
-            responseData['token'] != null) {
-          return {'success': true, 'token': responseData['token']};
-        } else {
-          return {
-            'success': false,
-            'error': 'Invalid response from server: Token not found',
-          };
-        }
-      } else {
-        String errorMessage = _getErrorMessage(
-          response.statusCode,
-          response.body,
-        );
-        return {'success': false, 'error': errorMessage};
-      }
-    } catch (e) {
-      return {'success': false, 'error': 'Connection failed: ${e.toString()}'};
-    }
-  }
+  //       if (responseData.containsKey('token') &&
+  //           responseData['token'] != null) {
+  //         return {'success': true, 'token': responseData['token']};
+  //       } else {
+  //         return {
+  //           'success': false,
+  //           'error': 'Invalid response from server: Token not found',
+  //         };
+  //       }
+  //     } else {
+  //       String errorMessage = _getErrorMessage(
+  //         response.statusCode,
+  //         response.body,
+  //       );
+  //       return {'success': false, 'error': errorMessage};
+  //     }
+  //   } catch (e) {
+  //     return {'success': false, 'error': 'Connection failed: ${e.toString()}'};
+  //   }
+  // }
 
   String _getErrorMessage(int statusCode, String responseBody) {
     try {

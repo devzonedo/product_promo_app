@@ -2,7 +2,7 @@ import 'dart:convert';
 import 'package:http/http.dart' as http;
 
 class ApiService {
-  static const String baseUrl = 'http://192.168.1.2:3000';
+  static const String baseUrl = 'http://192.168.1.3:3000';
   // For Android emulator: static const String baseUrl = 'http://10.0.2.2:3000';
 
   Future<Map<String, dynamic>> login(String username, String password) async {
@@ -40,6 +40,53 @@ class ApiService {
         'error':
             'Unable to connect to server. Please check your internet connection.',
       };
+    }
+  }
+
+  Future<Map<String, dynamic>> _authenticateUser(
+    String username,
+    String password,
+  ) async {
+    try {
+      final url = Uri.parse('http://192.168.1.2:3000/token');
+
+      // For Android emulator, use:
+      // final url = Uri.parse('http://10.0.2.2:3000/token');
+
+      final response = await http
+          .post(
+            url,
+            headers: {'Content-Type': 'application/json'},
+            body: jsonEncode({'username': username, 'password': password}),
+          )
+          .timeout(
+            const Duration(seconds: 10),
+            onTimeout: () {
+              throw Exception('Connection timeout. Please try again.');
+            },
+          );
+
+      if (response.statusCode == 200) {
+        final Map<String, dynamic> responseData = jsonDecode(response.body);
+
+        if (responseData.containsKey('token') &&
+            responseData['token'] != null) {
+          return {'success': true, 'token': responseData['token']};
+        } else {
+          return {
+            'success': false,
+            'error': 'Invalid response from server: Token not found',
+          };
+        }
+      } else {
+        // String errorMessage = _getErrorMessage(
+        //   response.statusCode,
+        //   response.body,
+        // );
+        return {'success': false, 'error': 'Error login'};
+      }
+    } catch (e) {
+      return {'success': false, 'error': 'Connection failed: ${e.toString()}'};
     }
   }
 
@@ -81,6 +128,61 @@ class ApiService {
         return 'Server error. Please try again later.';
       default:
         return 'Login failed. Please try again. (Error: ${response.statusCode})';
+    }
+  }
+
+  Future<Map<String, dynamic>> addProduct({
+    required String barcode,
+    required String name,
+    required double price,
+  }) async {
+    try {
+      final Map<String, dynamic> requestBody = {
+        "barcode": barcode,
+        "name": name,
+        "price": price,
+      };
+
+      print('Adding product with data: $requestBody'); // Debugging log
+      final response = await http.post(
+        Uri.parse('$baseUrl/products'),
+        headers: {'Content-Type': 'application/json'},
+        body: jsonEncode(requestBody),
+      );
+
+      if (response.statusCode == 200) {
+        final Map<String, dynamic> responseData = jsonDecode(response.body);
+        return {
+          'success': true,
+          'data': responseData,
+          'statusCode': response.statusCode,
+        };
+      } else {
+        // Try to get error message from response
+        String errorMessage =
+            'Server returned status code: ${response.statusCode}';
+        try {
+          final Map<String, dynamic> errorData = jsonDecode(response.body);
+          if (errorData.containsKey('message')) {
+            errorMessage = errorData['message'];
+          } else if (errorData.containsKey('error')) {
+            errorMessage = errorData['error'];
+          }
+        } catch (e) {
+          // If response body is not JSON
+          errorMessage = response.body.isNotEmpty
+              ? response.body
+              : errorMessage;
+        }
+
+        return {
+          'success': false,
+          'error': errorMessage,
+          'statusCode': response.statusCode,
+        };
+      }
+    } catch (e) {
+      return {'success': false, 'error': 'Network error: ${e.toString()}'};
     }
   }
 }

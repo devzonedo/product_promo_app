@@ -2,6 +2,7 @@ import 'package:flutter/material.dart';
 import '../main.dart';
 import 'login_screen.dart';
 import 'promotion_list_screen.dart';
+import 'product_add_screen.dart';
 
 class HomeScreen extends StatelessWidget {
   const HomeScreen({super.key});
@@ -17,6 +18,13 @@ class HomeScreen extends StatelessWidget {
     ];
 
     final adminItems = [
+      {
+        'icon': Icons.production_quantity_limits,
+        'title': 'Add Product',
+        'screen':
+            const ProductAddScreen(), // Replace with your admin dashboard screen
+        'requiresAuth': true,
+      },
       {
         'icon': Icons.dashboard,
         'title': 'Admin Dashboard',
