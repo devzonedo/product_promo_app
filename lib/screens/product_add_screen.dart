@@ -108,7 +108,7 @@ class _ProductAddScreenState extends State<ProductAddScreen> {
             crossAxisAlignment: CrossAxisAlignment.start,
             children: [
               const SizedBox(height: 8),
-              _buildDetailRow('Product ID', product.id.toString()),
+              _buildDetailRow('Barcode', product.barcode),
               const SizedBox(height: 12),
               _buildDetailRow('Name', product.name),
               const SizedBox(height: 12),

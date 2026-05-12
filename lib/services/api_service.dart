@@ -210,7 +210,7 @@ class ApiService {
     }
   }
 
-  // GET /products/:productId - Fetch single product by barcode
+  // New method to get product by barcode
   Future<Product> getProductByBarcode(String barcode) async {
     try {
       final response = await http.get(
@@ -219,11 +219,13 @@ class ApiService {
       );
 
       if (response.statusCode == 200) {
-        return Product.fromJson(jsonDecode(response.body));
+        return Product.fromJson(json.decode(response.body));
       } else if (response.statusCode == 404) {
         throw Exception('Product not found with barcode: $barcode');
       } else {
-        throw Exception('Failed to load product: ${response.statusCode}');
+        throw Exception(
+          'Failed to load product. Status code: ${response.statusCode}',
+        );
       }
     } catch (e) {
       throw Exception('Network error: $e');

@@ -3,6 +3,8 @@ import '../main.dart';
 import 'login_screen.dart';
 import 'promotion_list_screen.dart';
 import 'product_add_screen.dart';
+import 'product_list_screen.dart';
+import 'product_search_screen.dart';
 
 class HomeScreen extends StatelessWidget {
   const HomeScreen({super.key});
@@ -27,14 +29,16 @@ class HomeScreen extends StatelessWidget {
       },
       {
         'icon': Icons.dashboard,
-        'title': 'Admin Dashboard',
-        'screen': null, // Replace with your admin dashboard screen
+        'title': 'Product List',
+        'screen':
+            const ProductListScreen(), // Replace with your admin dashboard screen
         'requiresAuth': true,
       },
       {
         'icon': Icons.people,
-        'title': 'User Management',
-        'screen': null, // Replace with user management screen
+        'title': 'Product Search',
+        'screen':
+            const ProductSearchScreen(), // Replace with user management screen
         'requiresAuth': true,
       },
       {

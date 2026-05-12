@@ -23,7 +23,7 @@ class _ProductDetailScreenState extends State<ProductDetailScreen> {
   void initState() {
     super.initState();
     _barcodeController = TextEditingController(
-      text: widget.product.id.toString(),
+      text: widget.product.barcode.toString(),
     );
     _nameController = TextEditingController(text: widget.product.name);
     _priceController = TextEditingController(
@@ -59,8 +59,7 @@ class _ProductDetailScreenState extends State<ProductDetailScreen> {
 
     try {
       final updatedProduct = Product(
-        id: int.parse(_barcodeController.text),
-        barcode: "",
+        barcode: _barcodeController.text,
         name: _nameController.text.trim(),
         price: price,
         status: _status,
