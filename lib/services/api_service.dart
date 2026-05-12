@@ -195,13 +195,18 @@ class ApiService {
       );
 
       if (response.statusCode == 200) {
-        List<dynamic> body = jsonDecode(response.body);
-        return body.map((dynamic item) => Product.fromJson(item)).toList();
+        List<dynamic> body = json.decode(response.body);
+        List<Product> products = body
+            .map((dynamic item) => Product.fromJson(item))
+            .toList();
+        return products;
       } else {
-        throw Exception('Failed to load products: ${response.statusCode}');
+        throw Exception(
+          'Failed to load products. Status code: ${response.statusCode}',
+        );
       }
     } catch (e) {
-      throw Exception('Network error: $e');
+      throw Exception('Failed to load products: $e');
     }
   }
 
