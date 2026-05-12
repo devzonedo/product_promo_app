@@ -11,7 +11,7 @@ class HomeScreen extends StatelessWidget {
     final commonItems = [
       {
         'icon': Icons.list_alt,
-        'title': 'List Promotion xyz',
+        'title': 'List Promotion List',
         'screen': const PromotionListScreen(),
         'requiresAuth': true,
       },

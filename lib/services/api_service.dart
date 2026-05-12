@@ -1,5 +1,6 @@
 import 'dart:convert';
 import 'package:http/http.dart' as http;
+import '../models/product.dart';
 
 class ApiService {
   static const String baseUrl = 'http://192.168.1.3:3000';
@@ -183,6 +184,63 @@ class ApiService {
       }
     } catch (e) {
       return {'success': false, 'error': 'Network error: ${e.toString()}'};
+    }
+  }
+
+  Future<List<Product>> getProducts() async {
+    try {
+      final response = await http.get(
+        Uri.parse('$baseUrl/products'),
+        headers: {'Content-Type': 'application/json'},
+      );
+
+      if (response.statusCode == 200) {
+        List<dynamic> body = jsonDecode(response.body);
+        return body.map((dynamic item) => Product.fromJson(item)).toList();
+      } else {
+        throw Exception('Failed to load products: ${response.statusCode}');
+      }
+    } catch (e) {
+      throw Exception('Network error: $e');
+    }
+  }
+
+  // GET /products/:productId - Fetch single product by barcode
+  Future<Product> getProductByBarcode(String barcode) async {
+    try {
+      final response = await http.get(
+        Uri.parse('$baseUrl/products/$barcode'),
+        headers: {'Content-Type': 'application/json'},
+      );
+
+      if (response.statusCode == 200) {
+        return Product.fromJson(jsonDecode(response.body));
+      } else if (response.statusCode == 404) {
+        throw Exception('Product not found with barcode: $barcode');
+      } else {
+        throw Exception('Failed to load product: ${response.statusCode}');
+      }
+    } catch (e) {
+      throw Exception('Network error: $e');
+    }
+  }
+
+  // PUT /products/:productId - Update product
+  Future<Product> updateProduct(String barcode, Product updatedProduct) async {
+    try {
+      final response = await http.put(
+        Uri.parse('$baseUrl/products/$barcode'),
+        headers: {'Content-Type': 'application/json'},
+        body: jsonEncode(updatedProduct.toJson()),
+      );
+
+      if (response.statusCode == 200) {
+        return Product.fromJson(jsonDecode(response.body));
+      } else {
+        throw Exception('Failed to update product: ${response.statusCode}');
+      }
+    } catch (e) {
+      throw Exception('Network error: $e');
     }
   }
 }
