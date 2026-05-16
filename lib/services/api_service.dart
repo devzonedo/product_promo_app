@@ -1,10 +1,21 @@
 import 'dart:convert';
 import 'package:http/http.dart' as http;
+import 'package:product_promo_app/screens/app_state.dart';
 import '../models/product.dart';
 
 class ApiService {
   static const String baseUrl = 'http://192.168.1.3:3000';
   // For Android emulator: static const String baseUrl = 'http://10.0.2.2:3000';
+
+  final accessToken = AppState.token.toString();
+
+  Map<String, String> _getHeaders() {
+    return {
+      'Content-Type': 'application/json',
+      'access_token':
+          accessToken, // Ensure token is not null, use empty string if null
+    };
+  }
 
   Future<Map<String, dynamic>> login(String username, String password) async {
     try {
@@ -248,6 +259,72 @@ class ApiService {
       }
     } catch (e) {
       throw Exception('Network error: $e');
+    }
+  }
+
+  //User APIs ================================
+  // Create a new user
+  Future<Map<String, dynamic>> createUser({
+    required String username,
+    required String firstName,
+    required String lastName,
+    required String
+    userRole, // Note: changed from roleCode to userRole in request
+  }) async {
+    final url = Uri.parse('$baseUrl/user');
+
+    // Get access token
+    final accessToken = AppState.token;
+    final Map<String, dynamic> requestBody = {
+      'username': username,
+      'firstName': firstName,
+      'lastName': lastName,
+      'userRole': userRole, // Request uses "userRole" instead of "roleCode"
+    };
+
+    try {
+      final response = await http.post(
+        url,
+        headers: _getHeaders(), // Headers include access_token,
+        body: json.encode(requestBody),
+      );
+
+      if (response.statusCode == 200) {
+        // Success response - parse into User model
+        final Map<String, dynamic> responseData = json.decode(response.body);
+        return {
+          'success': true,
+          'data': responseData, // Keep raw data if needed
+          'statusCode': response.statusCode,
+        };
+      } else if (response.statusCode == 400) {
+        // Bad request response
+        final errorData = json.decode(response.body);
+        return {
+          'success': false,
+          'errorCode': errorData['errorCode'],
+          'message': errorData['message'],
+          'statusCode': response.statusCode,
+        };
+      } else if (response.statusCode == 401) {
+        // Unauthorized - token invalid or expired
+        return {
+          'success': false,
+          'message': 'Unauthorized: Invalid or expired token',
+          'statusCode': response.statusCode,
+        };
+      } else {
+        // Other error responses
+        return {
+          'success': false,
+          'message':
+              'Failed to create user. Status code: ${response.statusCode}',
+          'statusCode': response.statusCode,
+        };
+      }
+    } catch (e) {
+      // Network or other errors
+      return {'success': false, 'message': 'Network error: ${e.toString()}'};
     }
   }
 }

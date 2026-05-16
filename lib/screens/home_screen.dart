@@ -1,10 +1,12 @@
 import 'package:flutter/material.dart';
+import 'package:product_promo_app/screens/app_state.dart';
 import '../main.dart';
 import 'login_screen.dart';
 import 'promotion_list_screen.dart';
 import 'product_add_screen.dart';
 import 'product_list_screen.dart';
 import 'product_search_screen.dart';
+import 'user_create_screen.dart';
 
 class HomeScreen extends StatelessWidget {
   const HomeScreen({super.key});
@@ -43,8 +45,9 @@ class HomeScreen extends StatelessWidget {
       },
       {
         'icon': Icons.category,
-        'title': 'Manage Promotions',
-        'screen': null, // Replace with promotion management screen
+        'title': 'User Creation',
+        'screen':
+            const CreateUserScreen(), // Replace with promotion management screen
         'requiresAuth': true,
       },
     ];
@@ -134,6 +137,11 @@ class HomeScreen extends StatelessWidget {
     final username = userDetail?.username ?? 'User';
     final roleCode = userDetail?.roleCode ?? '';
     final menuItems = _getMenuItems(roleCode);
+
+    final token = AppState.token.toString();
+    //use app state
+    //String? username = AppState.token;
+
     print('menuItems length: $menuItems.length');
     return Scaffold(
       appBar: AppBar(
@@ -227,10 +235,15 @@ class HomeScreen extends StatelessWidget {
         child: Column(
           mainAxisAlignment: MainAxisAlignment.center,
           children: [
+            const SizedBox(height: 20),
+            Text(
+              'Ravinatha- $token ',
+              style: const TextStyle(fontSize: 24, fontWeight: FontWeight.bold),
+            ),
             Icon(Icons.home, size: 80, color: Colors.blue.shade300),
             const SizedBox(height: 16),
             const Text(
-              'Welcome to PromoApp!',
+              'Welcome to PromoApp x!',
               style: TextStyle(fontSize: 24, fontWeight: FontWeight.bold),
             ),
             const SizedBox(height: 8),
