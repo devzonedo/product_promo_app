@@ -1,5 +1,6 @@
 import 'package:flutter/material.dart';
 import 'package:product_promo_app/screens/app_state.dart';
+import 'package:product_promo_app/screens/user_list_screen.dart';
 import '../main.dart';
 import 'login_screen.dart';
 import 'promotion_list_screen.dart';
@@ -48,6 +49,13 @@ class HomeScreen extends StatelessWidget {
         'title': 'User Creation',
         'screen':
             const CreateUserScreen(), // Replace with promotion management screen
+        'requiresAuth': true,
+      },
+      {
+        'icon': Icons.category,
+        'title': 'User List',
+        'screen':
+            const UserListScreen(), // Replace with promotion management screen
         'requiresAuth': true,
       },
     ];

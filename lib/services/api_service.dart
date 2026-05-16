@@ -2,9 +2,10 @@ import 'dart:convert';
 import 'package:http/http.dart' as http;
 import 'package:product_promo_app/screens/app_state.dart';
 import '../models/product.dart';
+import '../models/user.dart';
 
 class ApiService {
-  static const String baseUrl = 'http://192.168.1.3:3000';
+  static const String baseUrl = 'http://192.168.1.2:3000';
   // For Android emulator: static const String baseUrl = 'http://10.0.2.2:3000';
 
   final accessToken = AppState.token.toString();
@@ -60,7 +61,7 @@ class ApiService {
     String password,
   ) async {
     try {
-      final url = Uri.parse('http://192.168.1.2:3000/token');
+      final url = Uri.parse('baseUrl/token');
 
       // For Android emulator, use:
       // final url = Uri.parse('http://10.0.2.2:3000/token');
@@ -325,6 +326,63 @@ class ApiService {
     } catch (e) {
       // Network or other errors
       return {'success': false, 'message': 'Network error: ${e.toString()}'};
+    }
+  }
+
+  Future<List<User>> getUsers() async {
+    try {
+      final response = await http.get(
+        Uri.parse('$baseUrl/users'),
+        headers: {'Content-Type': 'application/json'},
+      );
+
+      if (response.statusCode == 200) {
+        List<dynamic> data = json.decode(response.body);
+        return data.map((json) => User.fromJson(json)).toList();
+      } else {
+        throw Exception('Failed to load users: ${response.statusCode}');
+      }
+    } catch (e) {
+      throw Exception('Error fetching users: $e');
+    }
+  }
+
+  // New method to get user by ID
+  Future<Map<String, dynamic>> getUserById(int userId) async {
+    try {
+      final response = await http.get(
+        Uri.parse('$baseUrl/user/$userId'),
+        headers: {'Content-Type': 'application/json'},
+      );
+
+      if (response.statusCode == 200) {
+        return json.decode(response.body);
+      } else {
+        throw Exception('Failed to load user details: ${response.statusCode}');
+      }
+    } catch (e) {
+      throw Exception('Error fetching user details: $e');
+    }
+  }
+
+  // New method to update user status
+  Future<void> updateUserStatus(int userId, String status) async {
+    try {
+      final response = await http.put(
+        Uri.parse('$baseUrl/user/$userId'),
+        headers: {'Content-Type': 'application/json'},
+        body: json.encode({'status': status}),
+      );
+
+      print(
+        'Update user status response: ${response.statusCode} - ${response.body}',
+      ); // Debugging log
+
+      if (response.statusCode != 200 && response.statusCode != 204) {
+        throw Exception('Failed to update status: ${response.statusCode}');
+      }
+    } catch (e) {
+      throw Exception('Error updating user status: $e');
     }
   }
 }
