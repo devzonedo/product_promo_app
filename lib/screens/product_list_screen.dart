@@ -178,14 +178,10 @@ class ProductCard extends StatelessWidget {
                       style: const TextStyle(fontSize: 14, color: Colors.grey),
                     ),
                     const Spacer(),
-                    const Icon(
-                      Icons.attach_money,
-                      size: 16,
-                      color: Colors.green,
-                    ),
+
                     const SizedBox(width: 4),
                     Text(
-                      '${product.price.toStringAsFixed(2)}',
+                      'Rs. ${product.price.toStringAsFixed(2)}',
                       style: const TextStyle(
                         fontSize: 16,
                         fontWeight: FontWeight.w600,
@@ -214,7 +210,7 @@ class ProductCard extends StatelessWidget {
             children: [
               Text('Barcode: ${product.barcode}'),
               const SizedBox(height: 8),
-              Text('Price: \$${product.price.toStringAsFixed(2)}'),
+              Text('Price: Rs. ${product.price.toStringAsFixed(2)}'),
               const SizedBox(height: 8),
               Text('Status: ${product.status}'),
             ],
