@@ -244,10 +244,7 @@ class HomeScreen extends StatelessWidget {
           mainAxisAlignment: MainAxisAlignment.center,
           children: [
             const SizedBox(height: 20),
-            Text(
-              'Ravinatha- $token ',
-              style: const TextStyle(fontSize: 24, fontWeight: FontWeight.bold),
-            ),
+
             Icon(Icons.home, size: 80, color: Colors.blue.shade300),
             const SizedBox(height: 16),
             const Text(
